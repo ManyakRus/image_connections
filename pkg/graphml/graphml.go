@@ -348,7 +348,7 @@ func CreateElement_Edge(ElementGraph, ElementFrom, ElementTo *etree.Element, lab
 
 	//y:Arrows
 	ElementYArrows := ElementYPolyLineEdge.CreateElement("y:Arrows")
-	ElementYArrows.CreateAttr("source", "none")
+	ElementYArrows.CreateAttr("source", "standard")
 	ElementYArrows.CreateAttr("target", "standard")
 
 	//y:EdgeLabel

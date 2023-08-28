@@ -4,7 +4,8 @@ import (
 	"os"
 )
 
-const FILENAME_XGML = "packages.graphml"
+const FILENAME_GRAPHML = "packages.graphml"
+const SERVICE_NAME = "MAIN"
 
 // Settings хранит все нужные переменные окружения
 var Settings SettingsINI
@@ -13,6 +14,7 @@ var Settings SettingsINI
 type SettingsINI struct {
 	DIRECTORY_SOURCE string
 	FILENAME_GRAPHML string
+	SERVICE_NAME     string
 }
 
 // FillSettings загружает переменные окружения в структуру из переменных окружения
@@ -20,6 +22,7 @@ func FillSettings() {
 	Settings = SettingsINI{}
 	Settings.DIRECTORY_SOURCE = os.Getenv("DIRECTORY_SOURCE")
 	Settings.FILENAME_GRAPHML = os.Getenv("FILENAME_GRAPHML")
+	Settings.SERVICE_NAME = os.Getenv("SERVICE_NAME")
 
 	if Settings.DIRECTORY_SOURCE == "" {
 		Settings.DIRECTORY_SOURCE = CurrentDirectory()
@@ -27,7 +30,11 @@ func FillSettings() {
 	}
 
 	if Settings.FILENAME_GRAPHML == "" {
-		Settings.FILENAME_GRAPHML = FILENAME_XGML
+		Settings.FILENAME_GRAPHML = FILENAME_GRAPHML
+	}
+
+	if Settings.SERVICE_NAME == "" {
+		Settings.SERVICE_NAME = SERVICE_NAME
 	}
 
 	//
@@ -46,7 +53,7 @@ func CurrentDirectory() string {
 // FillFlags - заполняет параметры из командной строки
 func FillFlags() {
 	Args := os.Args[1:]
-	if len(Args) > 2 {
+	if len(Args) > 3 {
 		return
 	}
 
@@ -55,5 +62,8 @@ func FillFlags() {
 	}
 	if len(Args) > 1 {
 		Settings.FILENAME_GRAPHML = Args[1]
+	}
+	if len(Args) > 2 {
+		Settings.SERVICE_NAME = Args[2]
 	}
 }

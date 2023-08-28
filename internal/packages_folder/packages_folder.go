@@ -28,7 +28,8 @@ func CreateConfigPackages(dir string) *packages.Config {
 	cfg := &packages.Config{}
 	cfg.Context = ctxMain
 	cfg.Dir = dir
-	cfg.Mode = packages.NeedImports + packages.NeedName + packages.NeedExportFile + packages.NeedFiles
+	cfg.Mode = packages.NeedImports + packages.NeedName
+	//cfg.Mode = packages.NeedImports + packages.NeedName + packages.NeedExportFile + packages.NeedFiles
 	cfg.Tests = false
 	if err != nil {
 		log.Panic("FindAllFolders_FromDir() error: ", err)
@@ -65,21 +66,33 @@ func FindAllFolders_FromDir(dir string) *folders.Folder {
 //	return Otvet
 //}
 
-func FindPackageFromFolder(FolderRoot *folders.Folder) PackageFolder {
-	Otvet := PackageFolder{}
+//func FindPackageFromFolder(FolderRoot *folders.Folder) PackageFolder {
+//	Otvet := PackageFolder{}
+//
+//	RepositoryName := "" //FindRepositoryName(FolderRoot)
+//	ConfigPackages := CreateConfigPackages(FolderRoot.FileName)
+//	MassPackages, _ := packages.Load(ConfigPackages)
+//
+//	for _, v := range MassPackages {
+//		Otvet.Package = v
+//		RepositoryName = v.Name
+//		break
+//	}
+//	Otvet.Name = RepositoryName
+//	Otvet.FileName = FolderRoot.FileName
+//	Otvet.Imports = MassPackages
+//
+//	return Otvet
+//}
 
-	RepositoryName := "" //FindRepositoryName(FolderRoot)
-	ConfigPackages := CreateConfigPackages(FolderRoot.FileName)
-	MassPackages, _ := packages.Load(ConfigPackages)
+func FindMassPackageFromFolder(FileName string) []*packages.Package {
+	//Otvet := PackageFolder{}
 
-	for _, v := range MassPackages {
-		Otvet.Package = v
-		RepositoryName = v.Name
-		break
+	ConfigPackages := CreateConfigPackages(FileName)
+	MassPackages, err := packages.Load(ConfigPackages)
+	if err != nil {
+		log.Error("packages.Load() error: ", err)
 	}
-	Otvet.Name = RepositoryName
-	Otvet.FileName = FolderRoot.FileName
-	Otvet.Imports = MassPackages
 
-	return Otvet
+	return MassPackages
 }

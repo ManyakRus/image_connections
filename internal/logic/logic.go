@@ -6,15 +6,15 @@ import (
 	"github.com/ManyakRus/image_connections/internal/packages_folder"
 	"github.com/ManyakRus/image_connections/internal/parse_go"
 	"github.com/ManyakRus/image_connections/pkg/graphml"
-	"github.com/ManyakRus/starter/folders"
 	"github.com/ManyakRus/starter/log"
+	"github.com/ManyakRus/starter/micro"
 	"github.com/beevik/etree"
 	"golang.org/x/tools/go/packages"
 	"io"
 	"os"
+	"path"
 	"regexp"
-	"sort"
-	"strconv"
+	"strings"
 )
 
 // MapNameURL - связь URL и имени внешнего сервиса
@@ -23,35 +23,48 @@ var MapServiceURL = make(map[string]string)
 // MapPackagesElements - связь Пакета golang / Элемент файла .graphml
 var MapPackagesElements = make(map[*packages.Package]*etree.Element, 0)
 
-// MapPackageIDElements - связь ИД Пакета golang / Элемент файла .graphml
-var MapPackageIDElements = make(map[string]*etree.Element, 0)
+// MapServiceNameElements - связь ИД Пакета golang / Элемент файла .graphml
+var MapServiceNameElements = make(map[string]*etree.Element, 0)
 
 func StartFillAll(FileName string) bool {
 	Otvet := false
 
-	FolderRoot := packages_folder.FindAllFolders_FromDir(config.Settings.DIRECTORY_SOURCE)
-	if FolderRoot == nil {
-		log.Error("Error: not found folder: ", FolderRoot)
-		return Otvet
-	}
-
-	//var buffer *strings.Builder
-
-	//graphml.AddDirectory(buffer, FolderRoot.Name)
+	//RepositoryName := FindRepositoryName()
+	RepositoryName := config.Settings.SERVICE_NAME
 
 	DocXML, ElementGraph := graphml.CreateDocument()
 
-	//заполним каталоги и пакеты
-	log.Info("Start fill groups")
-	FillFolder(ElementGraph, nil, FolderRoot)
+	//рисуем элемент
+	//ElementShapeMain := graphml.CreateElement_Shape(ElementGraph, RepositoryName)
+	graphml.CreateElement_Shape(ElementGraph, RepositoryName)
 
-	//заполним связи
-	log.Info("Start fill links")
-	FillLinks(ElementGraph)
+	//
+	MassPackages := packages_folder.FindMassPackageFromFolder(config.Settings.DIRECTORY_SOURCE)
+	FillPackage(MassPackages, ElementGraph)
 
-	//заполним связи горутин
-	log.Info("Start fill goroutine links")
-	FillLinks_goroutine(ElementGraph)
+	//FolderRoot := packages_folder.FindAllFolders_FromDir(config.Settings.DIRECTORY_SOURCE)
+	//if FolderRoot == nil {
+	//	log.Error("Error: not found folder: ", FolderRoot)
+	//	return Otvet
+	//}
+	//
+	////var buffer *strings.Builder
+	//
+	////graphml.AddDirectory(buffer, FolderRoot.Name)
+	//
+	//DocXML, ElementGraph := graphml.CreateDocument()
+	//
+	////заполним каталоги и пакеты
+	//log.Info("Start fill groups")
+	//FillFolder(ElementGraph, nil, FolderRoot)
+	//
+	////заполним связи
+	//log.Info("Start fill links")
+	//FillLinks(ElementGraph)
+	//
+	////заполним связи горутин
+	//log.Info("Start fill goroutine links")
+	//FillLinks_goroutine(ElementGraph)
 
 	if len(MapPackagesElements) > 0 {
 		Otvet = true
@@ -77,7 +90,7 @@ func StartFillAll(FileName string) bool {
 func FillLinks(ElementGraph *etree.Element) {
 	for PackageFrom, ElementFrom := range MapPackagesElements {
 		for _, PackageImport := range PackageFrom.Imports {
-			ElementImport, ok := MapPackageIDElements[PackageImport.ID]
+			ElementImport, ok := MapServiceNameElements[PackageImport.ID]
 			if ok == false {
 				//посторонние импорты
 				//log.Panic("MapPackagesElements[PackageImport] error: ok =false")
@@ -106,7 +119,7 @@ func FillLinks_goroutine(ElementGraph *etree.Element) {
 				Go_package_import := GoImport1.Go_package_import
 				Go_func_name := GoImport1.Go_func_name
 
-				ElementImport, ok := MapPackageIDElements[Go_package_import]
+				ElementImport, ok := MapServiceNameElements[Go_package_import]
 				if ok == false {
 					//посторонние импорты
 					//continue
@@ -117,7 +130,7 @@ func FillLinks_goroutine(ElementGraph *etree.Element) {
 				graphml.CreateElement_Edge_blue(ElementGraph, ElementFrom, ElementImport, label, descr)
 			}
 
-			//ElementImport, ok := MapPackageIDElements[PackageImport.ID]
+			//ElementImport, ok := MapServiceNameElements[PackageImport.ID]
 			//if ok == false {
 			//	//посторонние импорты
 			//	//log.Panic("MapPackagesElements[PackageImport] error: ok =false")
@@ -128,65 +141,119 @@ func FillLinks_goroutine(ElementGraph *etree.Element) {
 	}
 }
 
-func FillFolder(ElementGraph, ElementGroup *etree.Element, Folder *folders.Folder) {
+func FillPackage(MassPackages []*packages.Package, ElementGraph *etree.Element) {
 
-	FolderName := Folder.Name
+	for _, v := range MassPackages {
+		PackageName := v.PkgPath
+		ServiceName := FindNeedShow(PackageName)
+		if ServiceName != "" {
+			//проверка уже нарисован
+			_, ok := MapServiceNameElements[ServiceName]
+			if ok == true {
+				//уже нарисован
+				continue
+			}
 
-	//ConfigPackages := packages_folder.CreateConfigPackages(Folder.FileName)
-	PackageFolder1 := packages_folder.FindPackageFromFolder(Folder)
-	PackageName := PackageFolder1.Name
-	//PackageNameFull := PackageFolder1.
-	//PackageName := FindFileNameShort(PackageNameFull)
-	if PackageName == "" && len(Folder.Folders) == 0 {
-		return
-	}
-
-	GroupName := FolderName
-	lines_count, func_count := FindLinesCount_package(PackageFolder1.Package)
-	if lines_count > 0 || func_count > 0 {
-		GroupName = GroupName + " ("
-		if func_count > 0 {
-			GroupName = GroupName + strconv.Itoa(func_count) + " func"
-			GroupName = GroupName + ", "
+			//рисуем элемент
+			ElementShape := graphml.CreateElement_Shape(ElementGraph, ServiceName)
+			MapPackagesElements[v] = ElementShape
+			MapServiceNameElements[ServiceName] = ElementShape
 		}
-		if lines_count > 0 {
-			GroupName = GroupName + strconv.Itoa(lines_count) + " lines"
+
+		//рекурсия всех импортов пакета
+		if len(v.Imports) > 0 {
+			// Convert map to slice of MassPackagesImports.
+			MassPackagesImports := []*packages.Package{}
+			for _, value := range v.Imports {
+				pos1 := strings.Index(value.PkgPath, ".")
+				//pos2 := strings.Index(value.PkgPath, "\\")
+				if pos1 > 0 {
+					MassPackagesImports = append(MassPackagesImports, value)
+				}
+			}
+
+			FillPackage(MassPackagesImports, ElementGraph)
 		}
-		GroupName = GroupName + ")"
-	}
-
-	//добавим группа (каталог)
-	var ElementGroup2 *etree.Element
-	if ElementGroup != nil {
-		ElementGroup2 = graphml.CreateElement_Group(ElementGroup, GroupName)
-	} else {
-		ElementGroup2 = graphml.CreateElement_Group(ElementGraph, GroupName)
-	}
-	if PackageName != "" {
-		//добавим пакет(package)
-		ElementShape := graphml.CreateElement_Shape(ElementGroup2, PackageName)
-		MapPackagesElements[PackageFolder1.Package] = ElementShape
-		MapPackageIDElements[PackageFolder1.Package.ID] = ElementShape
-		//MapPackagesElements[&PackageFolder1] = ElementShape
-	}
-
-	//сортировка
-	MassKeys := make([]string, 0, len(Folder.Folders))
-	for k := range Folder.Folders {
-		MassKeys = append(MassKeys, k)
-	}
-	sort.Strings(MassKeys)
-
-	//обход всех папок
-	for _, key1 := range MassKeys {
-		Folder1, ok := Folder.Folders[key1]
-		if ok == false {
-			log.Panic("Folder.Folders[key1] ok =false")
-		}
-		FillFolder(ElementGraph, ElementGroup2, Folder1)
 	}
 
 }
+
+func FindNeedShow(PackageURL string) string {
+	Otvet := ""
+
+	lenPackage := len(PackageURL)
+
+	for URL, ServiceName := range MapServiceURL {
+		lenConn := len(URL)
+		if lenConn > lenPackage {
+			continue
+		}
+		if URL != PackageURL[:lenConn] {
+			continue
+		}
+		Otvet = ServiceName
+		break
+	}
+
+	return Otvet
+}
+
+//func FillFolder(ElementGraph, ElementGroup *etree.Element, Folder *folders.Folder) {
+//
+//	FolderName := Folder.Name
+//
+//	PackageFolder1 := packages_folder.FindPackageFromFolder(Folder)
+//	PackageName := PackageFolder1.Name
+//	if PackageName == "" && len(Folder.Folders) == 0 {
+//		return
+//	}
+//
+//	GroupName := FolderName
+//	lines_count, func_count := FindLinesCount_package(PackageFolder1.Package)
+//	if lines_count > 0 || func_count > 0 {
+//		GroupName = GroupName + " ("
+//		if func_count > 0 {
+//			GroupName = GroupName + strconv.Itoa(func_count) + " func"
+//			GroupName = GroupName + ", "
+//		}
+//		if lines_count > 0 {
+//			GroupName = GroupName + strconv.Itoa(lines_count) + " lines"
+//		}
+//		GroupName = GroupName + ")"
+//	}
+//
+//	//добавим группа (каталог)
+//	var ElementGroup2 *etree.Element
+//	if ElementGroup != nil {
+//		ElementGroup2 = graphml.CreateElement_Group(ElementGroup, GroupName)
+//	} else {
+//		ElementGroup2 = graphml.CreateElement_Group(ElementGraph, GroupName)
+//	}
+//	if PackageName != "" {
+//		//добавим пакет(package)
+//		ElementShape := graphml.CreateElement_Shape(ElementGroup2, PackageName)
+//		MapPackagesElements[PackageFolder1.Package] = ElementShape
+//		MapServiceNameElements[PackageFolder1.Package.ID] = ElementShape
+//		//MapPackagesElements[&PackageFolder1] = ElementShape
+//	}
+//
+//	//сортировка
+//	MassKeys := make([]string, 0, len(Folder.Folders))
+//	for k := range Folder.Folders {
+//		MassKeys = append(MassKeys, k)
+//	}
+//	sort.Strings(MassKeys)
+//
+//	//обход всех папок
+//	for _, key1 := range MassKeys {
+//		Folder1, ok := Folder.Folders[key1]
+//		if ok == false {
+//			log.Panic("Folder.Folders[key1] ok =false")
+//		}
+//		FillFolder(ElementGraph, ElementGroup2, Folder1)
+//	}
+//
+//}
 
 //// FindFileNameShort - возвращает имя файла(каталога) без пути
 //func FindFileNameShort(path string) string {
@@ -297,4 +364,38 @@ func CountMatches(s string, re *regexp.Regexp) int {
 		total++
 	}
 	return total
+}
+
+// FindRepositoryName - находит имя папки (репозитория)
+func FindRepositoryName() string {
+	Otvet := ""
+
+	dir := config.Settings.DIRECTORY_SOURCE
+	if dir == "" {
+		return Otvet
+	}
+	if dir == "./" {
+		dir = micro.ProgramDir()
+	}
+	dir = DeleteFileSeperator(dir)
+	Otvet = path.Base(dir)
+
+	return Otvet
+}
+
+// DeleteFileSeperator - убирает в конце / или \
+func DeleteFileSeperator(dir string) string {
+	Otvet := dir
+
+	len1 := len(Otvet)
+	if len1 == 0 {
+		return Otvet
+	}
+
+	LastWord := Otvet[len1-1 : len1]
+	if LastWord == micro.SeparatorFile() {
+		Otvet = Otvet[0 : len1-1]
+	}
+
+	return Otvet
 }

@@ -15,3 +15,13 @@ func TestStartFillAll(t *testing.T) {
 	FileName := dir + "test" + micro.SeparatorFile() + "test_start.xgml"
 	StartFillAll(FileName)
 }
+
+func TestFindRepositoryName(t *testing.T) {
+	ConfigMain.LoadEnv()
+	config.FillSettings()
+
+	Otvet := FindRepositoryName()
+	if Otvet == "" {
+		t.Error("TestFindRepositoryName() error: =''")
+	}
+}
