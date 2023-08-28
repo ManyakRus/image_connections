@@ -17,6 +17,9 @@ import (
 	"strconv"
 )
 
+// MapNameURL - связь URL и имени внешнего сервиса
+var MapServiceURL = make(map[string]string)
+
 // MapPackagesElements - связь Пакета golang / Элемент файла .graphml
 var MapPackagesElements = make(map[*packages.Package]*etree.Element, 0)
 

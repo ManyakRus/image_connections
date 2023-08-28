@@ -1,0 +1,19 @@
+{
+  "github.com/segmentio/kafka-go": "KAFKA",
+  "gorm.io/driver/postgres": "POSTGRES",
+  "github.com/camunda/zeebe/clients/go/v8/pkg/entities": "CAMUNDA",
+  "github.com/camunda/zeebe/clients/go/v8/pkg/worker": "CAMUNDA",
+  "github.com/camunda/zeebe/clients/go/v8/pkg/zbc": "CAMUNDA",
+  "gitlab.aescorp.ru/dsp_dev/claim/nikitin/nats_connect": "NATS",
+  "github.com/nats-io/nats.go": "NATS",
+  "github.com/minio/minio-go": "MINIO",
+  "github.com/sashabaranov/go-openai": "Chat GPT",
+  "github.com/xhit/go-simple-mail": "EMail server",
+  "github.com/emersion/go-imap": "EMail IMAP server",
+  "github.com/denisenkom/go-mssqldb": "MSSQL",
+  "gorm.io/driver/sqlserver": "MSSQL",
+  "github.com/lib/pq": "POSTGRES",
+  "github.com/jackc/pgx": "POSTGRES",
+  "github.com/gotd": "TELEGRAM",
+  "go.mau.fi/whatsmeow": "WHATSAPP"
+}
