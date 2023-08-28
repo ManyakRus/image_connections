@@ -30,6 +30,8 @@ func Test_SaveJSON_to_file(t *testing.T) {
 
 func TestLoadJSON_from_file(t *testing.T) {
 	dir := micro.ProgramDir()
+
+	//главный файл
 	FileName := dir + "settings" + micro.SeparatorFile() + "connections.txt"
 	err := LoadJSON_from_file(FileName)
 	if err != nil {
@@ -39,4 +41,16 @@ func TestLoadJSON_from_file(t *testing.T) {
 	if len(logic.MapServiceURL) == 0 {
 		t.Error("TestLoadJSON_from_file() error: len =0")
 	}
+
+	//дополнительный файл
+	FileName = dir + "settings" + micro.SeparatorFile() + "connections_add.txt"
+	err = LoadJSON_from_file(FileName)
+	if err != nil {
+		t.Error("TestLoadJSON_from_file() error: ", err)
+	}
+
+	if len(logic.MapServiceURL) == 0 {
+		t.Error("TestLoadJSON_from_file() error: len =0")
+	}
+
 }
