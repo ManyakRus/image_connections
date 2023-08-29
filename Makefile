@@ -1,8 +1,8 @@
-SERVICEURL=github.com/ManyakRus/image_packages
-SERVICEURL2=github.com/ManyakRus/image_packages
+SERVICENAME=image_connections
+SERVICEURL=github.com/ManyakRus/$(SERVICENAME)
 
 FILEMAIN=./internal/main.go
-FILEAPP=./bin/image_connections
+FILEAPP=./bin/$(SERVICENAME)
 
 NEW_REPO=github.com/ManyakRus/image_connections
 
@@ -24,6 +24,14 @@ build:
 	cd ./cmd && \
 	./VersionToFile.py
 	cp $(FILEAPP) $(GOPATH)/bin
+
+	mkdir -p ./bin/settings
+	cp ./settings/connections.txt ./bin/settings/connections.txt
+	cp ./settings/connections_add.txt ./bin/settings/connections_add.txt
+
+	mkdir -p $(GOPATH)/bin/settings
+	cp ./settings/connections.txt $(GOPATH)/bin/settings/connections.txt
+	cp ./settings/connections_add.txt $(GOPATH)/bin/settings/connections_add.txt
 lint:
 	clear
 	go fmt ./...
@@ -46,4 +54,6 @@ newrepo:
 graph:
 	clear
 	image_packages ./ docs/packages.graphml
-
+conn:
+	clear
+	image_connections ./internal docs/connections.graphml $(SERVICENAME)

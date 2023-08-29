@@ -4,8 +4,8 @@ import (
 	"os"
 )
 
-const FILENAME_GRAPHML = "packages.graphml"
-const SERVICE_NAME = "MAIN"
+const FILENAME_GRAPHML = "connections.graphml"
+const SERVICE_NAME = "Main"
 
 // Settings хранит все нужные переменные окружения
 var Settings SettingsINI

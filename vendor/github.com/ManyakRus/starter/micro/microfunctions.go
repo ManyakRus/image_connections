@@ -200,7 +200,12 @@ func CurrentFilename() string {
 
 // ProgramDir - возвращает главный каталог программы, в конце "/"
 func ProgramDir_Common() string {
-	filename := os.Args[0]
+	//filename := os.Args[0]
+	filename, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+
 	dir := filepath.Dir(filename)
 	sdir := strings.ToLower(dir)
 

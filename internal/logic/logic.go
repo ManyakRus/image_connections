@@ -35,38 +35,17 @@ func StartFillAll(FileName string) bool {
 	DocXML, ElementGraph := graphml.CreateDocument()
 
 	//рисуем элемент
-	//ElementShapeMain := graphml.CreateElement_Shape(ElementGraph, RepositoryName)
-	graphml.CreateElement_Shape(ElementGraph, RepositoryName)
+	ElementShapeMain := graphml.CreateElement_Shape(ElementGraph, RepositoryName)
 
 	//
 	MassPackages := packages_folder.FindMassPackageFromFolder(config.Settings.DIRECTORY_SOURCE)
 	FillPackage(MassPackages, ElementGraph)
 
-	//FolderRoot := packages_folder.FindAllFolders_FromDir(config.Settings.DIRECTORY_SOURCE)
-	//if FolderRoot == nil {
-	//	log.Error("Error: not found folder: ", FolderRoot)
-	//	return Otvet
-	//}
-	//
-	////var buffer *strings.Builder
-	//
-	////graphml.AddDirectory(buffer, FolderRoot.Name)
-	//
-	//DocXML, ElementGraph := graphml.CreateDocument()
-	//
-	////заполним каталоги и пакеты
-	//log.Info("Start fill groups")
-	//FillFolder(ElementGraph, nil, FolderRoot)
-	//
-	////заполним связи
-	//log.Info("Start fill links")
-	//FillLinks(ElementGraph)
-	//
-	////заполним связи горутин
-	//log.Info("Start fill goroutine links")
-	//FillLinks_goroutine(ElementGraph)
+	//заполним связи
+	log.Info("Start fill links")
+	FillLinks(ElementGraph, ElementShapeMain)
 
-	if len(MapPackagesElements) > 0 {
+	if len(MapServiceNameElements) > 0 {
 		Otvet = true
 	}
 
@@ -76,7 +55,6 @@ func StartFillAll(FileName string) bool {
 	}
 
 	log.Info("Start save file")
-	//DocXML.IndentTabs()
 	DocXML.Indent(2)
 	err := DocXML.WriteToFile(FileName)
 	if err != nil {
@@ -87,18 +65,10 @@ func StartFillAll(FileName string) bool {
 }
 
 // FillLinks - заполняет связи (стрелки) между пакетами
-func FillLinks(ElementGraph *etree.Element) {
-	for PackageFrom, ElementFrom := range MapPackagesElements {
-		for _, PackageImport := range PackageFrom.Imports {
-			ElementImport, ok := MapServiceNameElements[PackageImport.ID]
-			if ok == false {
-				//посторонние импорты
-				//log.Panic("MapPackagesElements[PackageImport] error: ok =false")
-				continue
-			}
-			descr := PackageFrom.Name + " -> " + PackageImport.Name
-			graphml.CreateElement_Edge(ElementGraph, ElementFrom, ElementImport, "", descr)
-		}
+func FillLinks(ElementGraph, ElementShapeMain *etree.Element) {
+	for ServiceName, ElementTo := range MapServiceNameElements {
+		descr := config.Settings.SERVICE_NAME + " -> " + ServiceName
+		graphml.CreateElement_Edge(ElementGraph, ElementShapeMain, ElementTo, "", descr)
 	}
 }
 
@@ -145,6 +115,13 @@ func FillPackage(MassPackages []*packages.Package, ElementGraph *etree.Element) 
 
 	for _, v := range MassPackages {
 		PackageName := v.PkgPath
+
+		//test
+		pos1 := strings.Index(PackageName, "camunda")
+		if pos1 > 0 {
+			print("test")
+		}
+
 		ServiceName := FindNeedShow(PackageName)
 		if ServiceName != "" {
 			//проверка уже нарисован
