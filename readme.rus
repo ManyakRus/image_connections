@@ -19,10 +19,13 @@
 - Minio
 - EMail
 - Web
+- Web socket
 - Camunda
 - Whatsapp
 - Telegram
 - Chat GPT
+- Redis
+- Key cloak
 - и др.
 
 Добавить другие сервисы в список можно в файлах:

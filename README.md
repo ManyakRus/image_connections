@@ -21,11 +21,14 @@ Configured to display the following services:
 - Nats
 - Minio
 - Email
-- web
+- Web
+- Web socket
 - Camunda
 - whatsapp
 - Telegram
 - Chat GPT
+- Redis
+- Key cloak
 - and etc.
 
 You can add other services to the list in the files:
