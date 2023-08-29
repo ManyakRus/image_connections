@@ -23,5 +23,6 @@
   "github.com/ManyakRus/starter/nats_connect": "Nats",
   "github.com/ManyakRus/starter/minio_connect": "Minio",
   "github.com/ManyakRus/starter/liveness": "WEB server\nLiveness",
-  "github.com/ManyakRus/starter/whatsapp_connect": "Whatsapp"
+  "github.com/ManyakRus/starter/whatsapp_connect": "Whatsapp",
+  "github.com/go-redis/redis": "Redis"
 }
