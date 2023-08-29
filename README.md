@@ -9,6 +9,9 @@ Displayed:
 - the name of the current repository
 - names of external services, arrows to them
 
+![connections](https://github.com/ManyakRus/image_connections/assets/30662875/1126e873-ddf6-4b3a-ae48-6a8974f6c257)
+
+
 Sample execution (pictures) can be found in the examples directory
 
 Configured to display the following services:
