@@ -26,6 +26,7 @@
 - Chat GPT
 - Redis
 - Keycloak
+- Prometeus
 - и др.
 
 Добавить другие сервисы в список можно в файлах:

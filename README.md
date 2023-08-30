@@ -29,6 +29,7 @@ Configured to display the following services:
 - Chat GPT
 - Redis
 - Keycloak
+- Prometeus
 - and etc.
 
 You can add other services to the list in the files:
