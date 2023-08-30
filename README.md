@@ -28,7 +28,7 @@ Configured to display the following services:
 - Telegram
 - Chat GPT
 - Redis
-- Key cloak
+- Keycloak
 - and etc.
 
 You can add other services to the list in the files:

@@ -27,5 +27,6 @@
   "github.com/ManyakRus/starter/whatsapp_connect": "Whatsapp",
   "github.com/go-redis/redis": "Redis",
   "github.com/gorilla/websocket": "Web socket",
-  "github.com/Nerzal/gocloak": "Key cloak"
+  "github.com/Nerzal/gocloak": "Keycloak",
+  "github.com/prometheus/client_golang/prometheus/promhttp": "Prometeus"
 }

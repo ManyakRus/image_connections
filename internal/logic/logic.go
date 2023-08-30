@@ -116,11 +116,11 @@ func FillPackage(MassPackages []*packages.Package, ElementGraph *etree.Element) 
 	for _, v := range MassPackages {
 		PackageName := v.PkgPath
 
-		//test
-		pos1 := strings.Index(PackageName, "camunda")
-		if pos1 > 0 {
-			print("test")
-		}
+		////test
+		//pos1 := strings.Index(PackageName, "camunda")
+		//if pos1 > 0 {
+		//	print("test")
+		//}
 
 		ServiceName := FindNeedShow(PackageName)
 		if ServiceName != "" {
@@ -135,6 +135,9 @@ func FillPackage(MassPackages []*packages.Package, ElementGraph *etree.Element) 
 			ElementShape := graphml.CreateElement_Shape(ElementGraph, ServiceName)
 			MapPackagesElements[v] = ElementShape
 			MapServiceNameElements[ServiceName] = ElementShape
+
+			//
+			continue
 		}
 
 		//рекурсия всех импортов пакета
