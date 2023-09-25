@@ -28,5 +28,6 @@
   "github.com/go-redis/redis": "Redis",
   "github.com/gorilla/websocket": "Web socket",
   "github.com/Nerzal/gocloak": "Keycloak",
-  "github.com/prometheus/client_golang/prometheus/promhttp": "Prometeus"
+  "github.com/prometheus/client_golang/prometheus/promhttp": "Prometeus",
+  "github.com/syndtr/goleveldb": "GoLevelDB"
 }
