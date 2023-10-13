@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"github.com/ManyakRus/image_connections/internal/config"
 	"github.com/ManyakRus/image_connections/internal/packages_folder"
-	"github.com/ManyakRus/image_connections/internal/parse_go"
 	"github.com/ManyakRus/image_connections/pkg/graphml"
 	"github.com/ManyakRus/starter/log"
 	"github.com/ManyakRus/starter/micro"
@@ -26,6 +25,7 @@ var MapPackagesElements = make(map[*packages.Package]*etree.Element, 0)
 // MapServiceNameElements - связь ИД Пакета golang / Элемент файла .graphml
 var MapServiceNameElements = make(map[string]*etree.Element, 0)
 
+// StartFillAll - старт работы приложения
 func StartFillAll(FileName string) bool {
 	Otvet := false
 
@@ -72,45 +72,46 @@ func FillLinks(ElementGraph, ElementShapeMain *etree.Element) {
 	}
 }
 
-// FillLinks_goroutine - заполняет связи (стрелки) между пакетами для горутин go, синим цветом
-func FillLinks_goroutine(ElementGraph *etree.Element) {
-	for PackageFrom, ElementFrom := range MapPackagesElements {
-		for _, Filename1 := range PackageFrom.GoFiles {
+//// FillLinks_goroutine - заполняет связи (стрелки) между пакетами для горутин go, синим цветом
+//func FillLinks_goroutine(ElementGraph *etree.Element) {
+//	for PackageFrom, ElementFrom := range MapPackagesElements {
+//		for _, Filename1 := range PackageFrom.GoFiles {
+//
+//			AstFile, err := parse_go.ParseFile(Filename1)
+//			if err != nil {
+//				log.Warn("ParseFile() ", Filename1, " error: ", err)
+//				continue
+//			}
+//
+//			MassGoImport := parse_go.FindGo(AstFile)
+//			for _, GoImport1 := range MassGoImport {
+//				//Go_package_name := GoImport1.Go_package_name
+//				Go_package_import := GoImport1.Go_package_import
+//				Go_func_name := GoImport1.Go_func_name
+//
+//				ElementImport, ok := MapServiceNameElements[Go_package_import]
+//				if ok == false {
+//					//посторонние импорты
+//					//continue
+//					ElementImport = ElementFrom
+//				}
+//				label := Go_func_name
+//				descr := PackageFrom.Name + " -> " + GoImport1.Go_package_name
+//				graphml.CreateElement_Edge_blue(ElementGraph, ElementFrom, ElementImport, label, descr)
+//			}
+//
+//			//ElementImport, ok := MapServiceNameElements[PackageImport.ID]
+//			//if ok == false {
+//			//	//посторонние импорты
+//			//	//log.Panic("MapPackagesElements[PackageImport] error: ok =false")
+//			//	continue
+//			//}
+//			//graphml.CreateElement_Edge(ElementGraph, ElementFrom.Index(), ElementImport.Index())
+//		}
+//	}
+//}
 
-			AstFile, err := parse_go.ParseFile(Filename1)
-			if err != nil {
-				log.Warn("ParseFile() ", Filename1, " error: ", err)
-				continue
-			}
-
-			MassGoImport := parse_go.FindGo(AstFile)
-			for _, GoImport1 := range MassGoImport {
-				//Go_package_name := GoImport1.Go_package_name
-				Go_package_import := GoImport1.Go_package_import
-				Go_func_name := GoImport1.Go_func_name
-
-				ElementImport, ok := MapServiceNameElements[Go_package_import]
-				if ok == false {
-					//посторонние импорты
-					//continue
-					ElementImport = ElementFrom
-				}
-				label := Go_func_name
-				descr := PackageFrom.Name + " -> " + GoImport1.Go_package_name
-				graphml.CreateElement_Edge_blue(ElementGraph, ElementFrom, ElementImport, label, descr)
-			}
-
-			//ElementImport, ok := MapServiceNameElements[PackageImport.ID]
-			//if ok == false {
-			//	//посторонние импорты
-			//	//log.Panic("MapPackagesElements[PackageImport] error: ok =false")
-			//	continue
-			//}
-			//graphml.CreateElement_Edge(ElementGraph, ElementFrom.Index(), ElementImport.Index())
-		}
-	}
-}
-
+// FillPackage - заполняет MassPackagesImports
 func FillPackage(MassPackages []*packages.Package, ElementGraph *etree.Element) {
 
 	for _, v := range MassPackages {
@@ -146,8 +147,8 @@ func FillPackage(MassPackages []*packages.Package, ElementGraph *etree.Element) 
 			MassPackagesImports := []*packages.Package{}
 			for _, value := range v.Imports {
 				pos1 := strings.Index(value.PkgPath, ".")
-				//pos2 := strings.Index(value.PkgPath, "\\")
-				if pos1 > 0 {
+				pos2 := strings.Index(value.PkgPath, "/")
+				if pos1 > 0 || pos2 > 0 { //убираем стандартные пакеты
 					MassPackagesImports = append(MassPackagesImports, value)
 				}
 			}
@@ -158,6 +159,7 @@ func FillPackage(MassPackages []*packages.Package, ElementGraph *etree.Element) 
 
 }
 
+// FindNeedShow - возвращает красивое имя сервиса, только если его надо отобразить в схеме
 func FindNeedShow(PackageURL string) string {
 	Otvet := ""
 
@@ -246,6 +248,7 @@ func FindNeedShow(PackageURL string) string {
 //	return Otvet
 //}
 
+// FindLinesCount_package - находит количество строк в красивом названии пакета
 func FindLinesCount_package(Package1 *packages.Package) (int, int) {
 	LinesCount := 0
 	FuncCount := 0
@@ -267,6 +270,7 @@ func FindLinesCount_package(Package1 *packages.Package) (int, int) {
 	return LinesCount, FuncCount
 }
 
+// FindLinesCount - возвращает количество строк в пакете
 func FindLinesCount(FileName string) (int, int) {
 	LinesCount := 0
 	FuncCount := 0
@@ -287,6 +291,7 @@ func FindLinesCount(FileName string) (int, int) {
 	return LinesCount, FuncCount
 }
 
+// LinesCount_reader - возвращает количество строк в интерфейсе Reader
 func LinesCount_reader(r io.Reader) (int, error) {
 	Otvet := 0
 	var err error
