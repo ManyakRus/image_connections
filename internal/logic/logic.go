@@ -25,6 +25,15 @@ var MapPackagesElements = make(map[*packages.Package]*etree.Element, 0)
 // MapServiceNameElements - связь ИД Пакета golang / Элемент файла .graphml
 var MapServiceNameElements = make(map[string]*etree.Element, 0)
 
+// CountLinesFunctions - количество строк и количество функций
+type CountLinesFunctions struct {
+	LinesCount int
+	FuncCount  int
+}
+
+// FindLinesCount_Cache - кэш рассчитанных количество строк и количество функций
+var FindLinesCount_Cache = make(map[string]CountLinesFunctions)
+
 // StartFillAll - старт работы приложения
 func StartFillAll(FileName string) bool {
 	Otvet := false
@@ -275,6 +284,13 @@ func FindLinesCount(FileName string) (int, int) {
 	LinesCount := 0
 	FuncCount := 0
 
+	//
+	CountLinesFunctions1, isFinded := FindLinesCount_Cache[FileName]
+	if isFinded == true {
+		return CountLinesFunctions1.LinesCount, CountLinesFunctions1.FuncCount
+	}
+
+	//
 	bytes1, err := os.ReadFile(FileName)
 	if err != nil {
 		log.Fatal(err)
@@ -288,39 +304,70 @@ func FindLinesCount(FileName string) (int, int) {
 
 	FuncCount = FindFuncCount(&bytes1)
 
+	//
+	FindLinesCount_Cache[FileName] = CountLinesFunctions{
+		LinesCount: LinesCount,
+		FuncCount:  FuncCount,
+	}
 	return LinesCount, FuncCount
 }
 
-// LinesCount_reader - возвращает количество строк в интерфейсе Reader
+// LinesCount_reader - возвращает количество строк в файле
 func LinesCount_reader(r io.Reader) (int, error) {
-	Otvet := 0
-	var err error
+	defaultSize := 1024
+	defaultEndLine := "\n"
 
-	buf := make([]byte, 8192)
+	Size := defaultSize
+	Sep := defaultEndLine
+
+	buf := make([]byte, Size)
+	var count int
 
 	for {
-		c, err := r.Read(buf)
+		n, err := r.Read(buf)
+		count += bytes.Count(buf[:n], []byte(Sep))
+
 		if err != nil {
-			if err == io.EOF && c == 0 {
-				break
-			} else {
-				return Otvet, err
+			if err == io.EOF {
+				return count, nil
 			}
+			return count, err
 		}
 
-		for _, b := range buf[:c] {
-			if b == '\n' {
-				Otvet++
-			}
-		}
 	}
-
-	if err == io.EOF {
-		err = nil
-	}
-
-	return Otvet, err
 }
+
+//
+//// LinesCount_reader - возвращает количество строк в интерфейсе Reader
+//func LinesCount_reader(r io.Reader) (int, error) {
+//	Otvet := 0
+//	var err error
+//
+//	buf := make([]byte, 8192)
+//
+//	for {
+//		c, err := r.Read(buf)
+//		if err != nil {
+//			if err == io.EOF && c == 0 {
+//				break
+//			} else {
+//				return Otvet, err
+//			}
+//		}
+//
+//		for _, b := range buf[:c] {
+//			if b == '\n' {
+//				Otvet++
+//			}
+//		}
+//	}
+//
+//	if err == io.EOF {
+//		err = nil
+//	}
+//
+//	return Otvet, err
+//}
 
 // FindFuncCount - находит количество функций(func) в файле
 func FindFuncCount(bytes *[]byte) int {

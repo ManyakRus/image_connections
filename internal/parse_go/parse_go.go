@@ -17,7 +17,10 @@ type GoImport struct {
 	Go_func_name      string //имя вызываемой функции
 }
 
-// ParseDir - парсит все файлы .go, кроме тсетов
+// ParseFile_Cache - кэш пропарсенных файлов, для ускорения
+var ParseFile_Cache = make(map[string]*ast.File)
+
+// ParseDir - парсит все файлы .go, кроме тестов
 func ParseDir(Dir string) (map[string]*ast.Package, error) {
 
 	fset := token.NewFileSet() // positions are relative to fset
@@ -52,6 +55,13 @@ func filter_fn(fi fs.FileInfo) bool {
 
 // ParseFile - парсит файл .go
 func ParseFile(Filename string) (*ast.File, error) {
+	var err error
+
+	//поищем в кэш
+	Otvet, isFinded := ParseFile_Cache[Filename]
+	if isFinded == true {
+		return Otvet, err
+	}
 
 	fset := token.NewFileSet() // positions are relative to fset
 
@@ -65,6 +75,9 @@ func ParseFile(Filename string) (*ast.File, error) {
 	//for _, v := range AstFIle.Imports {
 	//	fmt.Println(v)
 	//}
+
+	//запомним в кэш
+	ParseFile_Cache[Filename] = Otvet
 
 	return AstFIle, err
 }
