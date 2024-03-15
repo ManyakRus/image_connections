@@ -38,12 +38,15 @@ func CreateConfigPackages(dir string) *packages.Config {
 	return cfg
 }
 
+// FindAllFolders_FromDir - возвращает дерево всех папок и файлов в директории
 func FindAllFolders_FromDir(dir string) *folders.Folder {
 
-	FolderRoot := folders.FindFoldersTree(dir, true, false, false, "vendor")
-
-	//FoldersPackage := FoldersPackages{}
-	//FoldersPackage := FillFoldersPackages(FolderRoot, cfg)
+	MassExclude := make([]string, 0)
+	MassExclude = append(MassExclude, "vendor")
+	//MassExclude = append(MassExclude, ".git")
+	//MassExclude = append(MassExclude, ".idea")
+	//MassExclude = append(MassExclude, ".vscode")
+	FolderRoot := folders.FindFoldersTree(dir, true, false, false, MassExclude)
 
 	return FolderRoot
 }

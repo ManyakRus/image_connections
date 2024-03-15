@@ -14,6 +14,10 @@ func main() {
 }
 
 func StartApp() {
+	//сменим текущую директорию чтоб работали локальные пути
+	//config.ChangeCurrentDirectory()
+
+	//
 	ConfigMain.LoadEnv()
 	config.FillSettings()
 	config.FillFlags()
@@ -21,7 +25,7 @@ func StartApp() {
 	load_json.LoadJSON()
 
 	FileName := config.Settings.FILENAME_GRAPHML
-	log.Info("directory: ", config.Settings.DIRECTORY_SOURCE)
+	log.Info("source directory: ", config.Settings.DIRECTORY_SOURCE)
 	log.Info("file graphml: ", FileName)
 	log.Info("service name: ", config.Settings.SERVICE_NAME)
 	ok := logic.StartFillAll(FileName)

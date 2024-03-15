@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/ManyakRus/starter/log"
 	"os"
 )
 
@@ -19,6 +20,7 @@ type SettingsINI struct {
 
 // FillSettings загружает переменные окружения в структуру из переменных окружения
 func FillSettings() {
+	//
 	Settings = SettingsINI{}
 	Settings.DIRECTORY_SOURCE = os.Getenv("DIRECTORY_SOURCE")
 	Settings.FILENAME_GRAPHML = os.Getenv("FILENAME_GRAPHML")
@@ -38,6 +40,22 @@ func FillSettings() {
 	}
 
 	//
+}
+
+// ChangeCurrentDirectory - устанавливает текущую директорию на директорию откуда запущена программа
+// вместо директории где находится программа
+func ChangeCurrentDirectory() {
+	var err error
+
+	// сменим директорию на текущую
+	dir := CurrentDirectory()
+	err = os.Chdir(dir)
+	if err != nil {
+		log.Error("Chdir error: ", err)
+	} else {
+		log.Info("Chdir: ", dir)
+	}
+
 }
 
 // CurrentDirectory - возвращает текущую директорию ОС

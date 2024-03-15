@@ -13,7 +13,7 @@ func LoadJSON() {
 	var err error
 	dir := micro.ProgramDir()
 
-	log.Info("app directory: ", dir)
+	log.Info("settings directory: ", dir)
 
 	//главный файл
 	FileName := dir + "settings" + micro.SeparatorFile() + "connections.txt"
