@@ -46,7 +46,7 @@ https://www.yworks.com/products/yed/download
 image_connections file will appear in the bin folder
 
 3. Run the image_connections file with parameters:
->image_connections <your repository directory> <filename.graphml> <your repository name>
+>image_connections <your repository main.go file directory> <filename.graphml> <your repository name>
 >
 (or make an .env file
 DIRECTORY_SOURCE=
