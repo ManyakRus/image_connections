@@ -120,17 +120,19 @@ func FillLinks(ElementGraph, ElementShapeMain *etree.Element) {
 //	}
 //}
 
+// CachePackageName - кэш уже проверенных элементов
+var CachePackageName = make(map[string]bool, 0)
+
 // FillPackage - заполняет MassPackagesImports
 func FillPackage(MassPackages []*packages.Package, ElementGraph *etree.Element) {
 
 	for _, v := range MassPackages {
 		PackageName := v.PkgPath
 
-		////test
-		//pos1 := strings.Index(PackageName, "camunda")
-		//if pos1 > 0 {
-		//	print("test")
-		//}
+		_, ok := CachePackageName[PackageName]
+		if ok == true {
+			continue
+		}
 
 		ServiceName := FindNeedShow(PackageName)
 		if ServiceName != "" {
@@ -149,6 +151,8 @@ func FillPackage(MassPackages []*packages.Package, ElementGraph *etree.Element) 
 			//
 			continue
 		}
+
+		CachePackageName[PackageName] = true
 
 		//рекурсия всех импортов пакета
 		if len(v.Imports) > 0 {
