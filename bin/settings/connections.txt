@@ -9,6 +9,7 @@
   "github.com/xhit/go-simple-mail": "EMail server",
   "github.com/emersion/go-imap": "EMail IMAP server",
   "github.com/denisenkom/go-mssqldb": "MSSQL",
+  "gorm.io/driver/sqlserver": "MSSQL",
   "github.com/lib/pq": "Postgres",
   "github.com/jackc/pgx": "Postgres",
   "github.com/gotd": "Telegram",
