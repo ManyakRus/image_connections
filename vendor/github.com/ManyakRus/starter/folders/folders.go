@@ -2,10 +2,12 @@ package folders
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 type File struct {
@@ -86,7 +88,7 @@ func FindFoldersTree(dir string, NeedFolders, NeedFiles, NeedDot bool, MassExclu
 		}
 
 		// проверка скрытые файлы с точкой
-		if NeedDot == false && len(Name) > 0 && Name[0:1] == "." {
+		if NeedDot == false && strings.HasPrefix(Name, ".") {
 			continue
 		}
 
@@ -118,4 +120,33 @@ func FindFoldersTree(dir string, NeedFolders, NeedFiles, NeedDot bool, MassExclu
 	}
 
 	return tree
+}
+
+// FindFiles_FromDirectory - возвращает список файлов, начиная в директории dir, с суффиксом(расширение файла) Suffix
+func FindFiles_FromDirectory(dir string, Suffix string) ([]string, error) {
+	var Otvet []string
+	var err error
+
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		err = fmt.Errorf("ReadDir() error: %w", err)
+		return Otvet, err
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		Filename := file.Name()
+
+		if Suffix != "" {
+			if strings.HasSuffix(Filename, Suffix) == false {
+				continue
+			}
+		}
+		FilenameFull := path.Join(dir, Filename)
+		Otvet = append(Otvet, FilenameFull)
+	}
+
+	return Otvet, err
 }
